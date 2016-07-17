@@ -14,6 +14,7 @@ Set-Variable actionUnzip -option Constant -value "unzip"
 Set-Variable parameterName -option Constant -value "{Name}"
 Set-Variable parameterUrl -option Constant -value "{Url}"
 Set-Variable parameterInstruction -option Constant -value "{Instruction}"
+Set-Variable parameterMd5 -option Constant -value "{MD5}"
 
 function Get-OutputLocation
 {	
@@ -25,7 +26,8 @@ function New-OneLiner
 	param (
 		$Name,
 		$Url,
-		$Instruction,
+		$Instruction="",
+		$Md5="",
 		[switch]$Unzip,
 		[switch]$Download,
 		[switch]$Install
@@ -34,6 +36,7 @@ function New-OneLiner
 	$obj = New-Object PSObject
 	$obj | add-member Noteproperty Name $Name
 	$obj | add-member Noteproperty Url $Url
+	$obj | add-member Noteproperty Md5 $Md5
 	$obj | add-member Noteproperty Instruction $Instruction
 	$obj | add-member Noteproperty CommandLine ""
 	$obj | add-member Noteproperty FileName ([io.path]::Combine((Get-OutputLocation), "$($Name).oneliner.ps1"))
@@ -62,6 +65,7 @@ function Get-OneLinerCommandLine()
 	$Template = $Template -replace $parameterName, $Object.Name
 	$Template = $Template -replace $parameterUrl, $Object.Url
 	$Template = $Template -replace $parameterInstruction, $Object.Instruction
+	$Template = $Template -replace $parameterMd5, $Object.Md5
 	return $Template	
 }
 
@@ -71,6 +75,7 @@ $oneliners = @(
 	(New-OneLiner -Name "Fiddler" -Url "https://www.telerik.com/docs/default-source/fiddler/fiddlersetup.exe" -Install -Instruction '& $outfile /S'),
 	(New-OneLiner -Name "Git" -Url "https://github.com/git-for-windows/git/releases/download/v2.9.2.windows.1/Git-2.9.2-64-bit.exe" -Install -Instruction '& $outfile /VERYSILENT /SUPPRESSMSGBOXES /LOG="$($outfile).log"'),
 	(New-OneLiner -Name "SublimeText3" -Url "https://download.sublimetext.com/Sublime%20Text%20Build%203114%20x64%20Setup.exe" -Install -Instruction '& $outfile /VERYSILENT /SUPPRESSMSGBOXES /LOG="$($outfile).log"'),
+	(New-OneLiner -Name "WinDirStat" -Url "https://windirstat.info/wds_current_setup.exe" -Md5 "3abf1c149873e25d4e266225fbf37cbf" -Install -Instruction '& $outfile /S'),
 	$null
 ) | ?{$_}
 
@@ -81,7 +86,7 @@ function Generate-CommandLine
 		[switch]$DisableInstall)
 
 
-	$downloadTemplate = '$ErrorActionPreference="Stop";$url="' + $parameterUrl + '";$outdir="$($env:USERPROFILE)\Downloads\' + $parameterName + '";$outfile=[System.IO.Path]::Combine($outdir,(Split-Path -Leaf ([uri]::UnescapeDataString($url))));mkdir $outdir -Force|Out-Null;if(!(Test-Path $outfile)){$(New-Object Net.WebClient).DownloadFile($url, $outfile)};if(!(Test-Path $outfile)){throw "Download Failed: $($url)"};'
+	$downloadTemplate = '$ErrorActionPreference="Stop";$url="' + $parameterUrl + '";$outdir="$($env:USERPROFILE)\Downloads\' + $parameterName + '";$outfile=[System.IO.Path]::Combine($outdir,(Split-Path -Leaf ([uri]::UnescapeDataString($url))));mkdir $outdir -Force|Out-Null;if(!(Test-Path $outfile)){$(New-Object Net.WebClient).DownloadFile($url, $outfile)};if(!(Test-Path $outfile)){throw "Download Failed: $($url)"};$md5="{MD5}";if ($md5 -and ($md5 -notlike (Get-FileHash $outfile -Algorithm MD5).Hash)) {throw "MD5 check failed!"};'
 	$installTemplate = $downloadTemplate + ' ' + $parameterInstruction + ';'
 	$unzipTemplate = $downloadTemplate + '$dest=' + $parameterInstruction +';if (!(Test-Path $dest -pathType container)){mkdir $dest -Force|Out-Null};(new-object -com shell.application).namespace($dest).CopyHere((new-object -com shell.application).namespace("$($outfile)").Items(),16);'
 
@@ -138,7 +143,7 @@ function TestScripts
 {
 	param (
 		[Parameter(Mandatory=$true)]
-		$OneLiners)
+		[array]$OneLiners)
 
 	$jobs = @()
 	$index = 0
@@ -180,7 +185,7 @@ function TestDownload
 {
 	param (
 		[Parameter(Mandatory=$true)]
-		$OneLiners)
+		[array]$OneLiners)
 
 	$tempdir = Join-Path ([IO.Path]::GetTempPath()) ([guid]::NewGuid())
 	mkdir $tempdir -Force | Out-Null
@@ -231,7 +236,7 @@ function Main
 {
 	param (
 		[Parameter(Mandatory=$true)]
-		$OneLiners,
+		[array]$OneLiners,
 		[switch]$DisableInstall)
 
 	$outputdir = Get-OutputLocation
