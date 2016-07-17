@@ -244,7 +244,7 @@ function Main
 		$OneLiners | %{
 			$obj = $_
 			Write-Host "Writing $($obj.FileName)"
-			$obj.CommandLine | Out-File $obj.FileName
+			[System.IO.File]::WriteAllLines($obj.FileName, $obj.CommandLine)
 		}
 	}
 }
