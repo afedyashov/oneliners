@@ -10,6 +10,7 @@ $ErrorActionPreference = "Stop"
 Set-Variable actionDownload -option Constant -value "download"
 Set-Variable actionInstall -option Constant -value "install"
 Set-Variable actionUnzip -option Constant -value "unzip"
+Set-Variable actionExecute -option Constant -value "execute"
 
 Set-Variable parameterName -option Constant -value "{Name}"
 Set-Variable parameterUrl -option Constant -value "{Url}"
@@ -25,12 +26,13 @@ function New-OneLiner
 {
 	param (
 		$Name,
-		$Url,
+		$Url="",
 		$Instruction="",
 		$Md5="",
 		[switch]$Unzip,
 		[switch]$Download,
-		[switch]$Install
+		[switch]$Install,
+		[switch]$RunScript
 	)
 	
 	$obj = New-Object PSObject
@@ -52,6 +54,10 @@ function New-OneLiner
 	elseif ($Unzip)
 	{
 		$obj | add-member Noteproperty Action $actionUnzip
+	}
+	elseif ($RunScript)
+	{
+		$obj | add-member Noteproperty Action $actionExecute
 	}
 	return $obj
 }
@@ -76,6 +82,11 @@ $oneliners = @(
 	(New-OneLiner -Name "Git" -Url "https://github.com/git-for-windows/git/releases/download/v2.9.2.windows.1/Git-2.9.2-64-bit.exe" -Install -Instruction '& $outfile /VERYSILENT /SUPPRESSMSGBOXES /LOG="$($outfile).log"'),
 	(New-OneLiner -Name "SublimeText3" -Url "https://download.sublimetext.com/Sublime%20Text%20Build%203114%20x64%20Setup.exe" -Install -Instruction '& $outfile /VERYSILENT /SUPPRESSMSGBOXES /LOG="$($outfile).log"'),
 	(New-OneLiner -Name "WinDirStat" -Url "https://windirstat.info/wds_current_setup.exe" -Md5 "3abf1c149873e25d4e266225fbf37cbf" -Install -Instruction '& $outfile /S'),
+	(New-OneLiner -Name "FirewallFileAndPrint" -RunScript -Instruction '& netsh advfirewall firewall set rule group="File and Printer Sharing" new enable=Yes'),
+	(New-OneLiner -Name "FirewallRemoteDesktop" -RunScript -Instruction '& netsh advfirewall firewall set rule group="remote desktop" new enable=Yes'),
+	(New-OneLiner -Name "AzurePowershell" -Url "http://aka.ms/webpi-azps" -Install -Instruction 'move-item $outfile "$($outfile).exe" -Force; & "$($outfile).exe"'),		
+	(New-OneLiner -Name "DisableESCForAdmins" -RunScript -Instruction '& REG.EXE ADD "HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}" /v IsInstalled /t REG_DWORD /d 00000000 /f'),
+	(New-OneLiner -Name "DisableESCForUsers" -RunScript -Instruction '& REG.EXE ADD "HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}" /v IsInstalled /t REG_DWORD /d 00000000 /f'),
 	$null
 ) | ?{$_}
 
@@ -89,11 +100,13 @@ function Generate-CommandLine
 	$downloadTemplate = '$ErrorActionPreference="Stop";$url="' + $parameterUrl + '";$outdir="$($env:USERPROFILE)\Downloads\' + $parameterName + '";$outfile=[System.IO.Path]::Combine($outdir,(Split-Path -Leaf ([uri]::UnescapeDataString($url))));mkdir $outdir -Force|Out-Null;if(!(Test-Path $outfile)){$(New-Object Net.WebClient).DownloadFile($url, $outfile)};if(!(Test-Path $outfile)){throw "Download Failed: $($url)"};$md5="{MD5}";if ($md5 -and ($md5 -notlike (Get-FileHash $outfile -Algorithm MD5).Hash)) {throw "MD5 check failed!"};'
 	$installTemplate = $downloadTemplate + ' ' + $parameterInstruction + ';'
 	$unzipTemplate = $downloadTemplate + '$dest=' + $parameterInstruction +';if (!(Test-Path $dest -pathType container)){mkdir $dest -Force|Out-Null};(new-object -com shell.application).namespace($dest).CopyHere((new-object -com shell.application).namespace("$($outfile)").Items(),16);'
+	$executeTemplate = $parameterInstruction + ';'
 
 	$actionTemplates = @{
 		$actionUnzip = $unzipTemplate;
 		$actionDownload = $downloadTemplate;
-		$actionInstall = $installTemplate
+		$actionInstall = $installTemplate;
+		$actionExecute = $executeTemplate;
 	}
 
 	$oneliners | %{
