@@ -84,9 +84,11 @@ $oneliners = @(
 	(New-OneLiner -Name "WinDirStat" -Url "https://windirstat.info/wds_current_setup.exe" -Md5 "3abf1c149873e25d4e266225fbf37cbf" -Install -Instruction '& $outfile /S'),
 	(New-OneLiner -Name "FirewallFileAndPrint" -RunScript -Instruction '& netsh advfirewall firewall set rule group="File and Printer Sharing" new enable=Yes'),
 	(New-OneLiner -Name "FirewallRemoteDesktop" -RunScript -Instruction '& netsh advfirewall firewall set rule group="remote desktop" new enable=Yes'),
-	(New-OneLiner -Name "AzurePowershell" -Url "http://aka.ms/webpi-azps" -Install -Instruction 'move-item $outfile "$($outfile).exe" -Force; & "$($outfile).exe"'),		
+	(New-OneLiner -Name "AzurePowershell" -Url "http://aka.ms/webpi-azps" -Install -Instruction 'move-item $outfile "$($outfile).exe" -Force; & "$($outfile).exe"'), # didn't figure out options for unattended
 	(New-OneLiner -Name "DisableESCForAdmins" -RunScript -Instruction '& REG.EXE ADD "HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}" /v IsInstalled /t REG_DWORD /d 00000000 /f'),
 	(New-OneLiner -Name "DisableESCForUsers" -RunScript -Instruction '& REG.EXE ADD "HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}" /v IsInstalled /t REG_DWORD /d 00000000 /f'),
+	(New-OneLiner -Name "Speccy" -Url "http://download.piriform.com/spsetup129.exe" -Install -Instruction '& $outfile /S'),
+	(New-OneLiner -Name "Launchy" -Url "http://www.launchy.net/downloads/win/Launchy2.5.exe" -Install -Instruction '& $outfile'), # didn't figure out options for unattended
 	$null
 ) | ?{$_}
 
