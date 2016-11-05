@@ -80,7 +80,7 @@ $oneliners = @(
 	(New-OneLiner -Name "SysInternals" -Url "http://download.sysinternals.com/files/SysinternalsSuite.zip" -Unzip -Instruction '"$($env:USERPROFILE)\bin"'),
 	(New-OneLiner -Name "Fiddler" -Url "https://www.telerik.com/docs/default-source/fiddler/fiddlersetup.exe" -Install -Instruction '& $outfile /S'),
 	(New-OneLiner -Name "Git" -Url "https://github.com/git-for-windows/git/releases/download/v2.9.2.windows.1/Git-2.9.2-64-bit.exe" -Install -Instruction '& $outfile /VERYSILENT /SUPPRESSMSGBOXES /LOG="$($outfile).log"'),
-	(New-OneLiner -Name "SublimeText3" -Url "https://download.sublimetext.com/Sublime%20Text%20Build%203114%20x64%20Setup.exe" -Install -Instruction '& $outfile /VERYSILENT /SUPPRESSMSGBOXES /LOG="$($outfile).log"'),
+	(New-OneLiner -Name "SublimeText3" -Url "https://download.sublimetext.com/Sublime%20Text%20Build%203126%20x64%20Setup.exe" -Install -Instruction '& $outfile /VERYSILENT /SUPPRESSMSGBOXES /LOG="$($outfile).log"'),
 	(New-OneLiner -Name "WinDirStat" -Url "https://windirstat.info/wds_current_setup.exe" -Md5 "3abf1c149873e25d4e266225fbf37cbf" -Install -Instruction '& $outfile /S'),
 	(New-OneLiner -Name "FirewallFileAndPrint" -RunScript -Instruction '& netsh advfirewall firewall set rule group="File and Printer Sharing" new enable=Yes'),
 	(New-OneLiner -Name "FirewallRemoteDesktop" -RunScript -Instruction '& netsh advfirewall firewall set rule group="remote desktop" new enable=Yes'),
@@ -89,6 +89,8 @@ $oneliners = @(
 	(New-OneLiner -Name "DisableESCForUsers" -RunScript -Instruction '& REG.EXE ADD "HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}" /v IsInstalled /t REG_DWORD /d 00000000 /f'),
 	(New-OneLiner -Name "Speccy" -Url "http://download.piriform.com/spsetup129.exe" -Install -Instruction '& $outfile /S'),
 	(New-OneLiner -Name "Launchy" -Url "http://www.launchy.net/downloads/win/Launchy2.5.exe" -Install -Instruction '& $outfile'), # didn't figure out options for unattended
+	(New-OneLiner -Name "7Zip" -Url "http://www.7-zip.org/a/7z1604-x64.exe" -Install -Instruction '& $outfile /S'),
+	(New-OneLiner -Name "Everything" -Url "http://www.voidtools.com/Everything-1.2.1.371.zip" -Unzip -Instruction '"$($env:USERPROFILE)\bin"'),
 	$null
 ) | ?{$_}
 
