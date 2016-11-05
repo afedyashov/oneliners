@@ -91,6 +91,7 @@ $oneliners = @(
 	(New-OneLiner -Name "Launchy" -Url "http://www.launchy.net/downloads/win/Launchy2.5.exe" -Install -Instruction '& $outfile'), # didn't figure out options for unattended
 	(New-OneLiner -Name "7Zip" -Url "http://www.7-zip.org/a/7z1604-x64.exe" -Install -Instruction '& $outfile /S'),
 	(New-OneLiner -Name "Everything" -Url "http://www.voidtools.com/Everything-1.2.1.371.zip" -Unzip -Instruction '"$($env:USERPROFILE)\bin"'),
+	(New-OneLiner -Name "BeyondCompare" -Url "http://www.scootersoftware.com/BCompare-4.1.9.21719.exe" -Install -Instruction '& $outfile /VERYSILENT /SUPPRESSMSGBOXES /LOG="$($outfile).log"'),
 	$null
 ) | ?{$_}
 
