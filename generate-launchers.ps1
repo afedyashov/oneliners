@@ -13,7 +13,7 @@ function Generate-SublimeLauncher
         throw "Invalid argument: FileName"
     }
     
-    Generate-LauncherForTargets -FileName $FileName -Whatif:$Whatif -Targets @("c:\Program Files\Sublime Text 3\subl.exe")
+    Generate-LauncherForTargets -FileName $FileName -Whatif:$Whatif -Targets @("c:\Program Files\Sublime Text 3\subl.exe", "c:\Program Files (x86)\Sublime Text 2\sublime_text.exe")
 }
 
 function Generate-EverythingLauncher
