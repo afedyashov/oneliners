@@ -53,7 +53,7 @@ function Generate-LauncherForTargets
         $index += 1
         $script += @"
 if not exist "{0}" goto :next{1}
-start "target" "{0}"
+start "target" "{0}" %*
 :next{1}
 
 "@ -f $target, $index
