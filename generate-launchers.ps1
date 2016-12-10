@@ -28,6 +28,18 @@ function Generate-EverythingLauncher
     Generate-LauncherForTargets -FileName $FileName -Whatif:$Whatif -Targets @(Join-Path $env:USERPROFILE "bin\Everything-1.2.1.371.exe")
 }
 
+function Generate-NSwagLauncher
+{
+    param ($FileName, [switch]$Whatif)
+
+    if ([string]::IsNullOrEmpty($FileName))
+    {
+        throw "Invalid argument: FileName"
+    }
+    
+    Generate-LauncherForTargets -FileName $FileName -Whatif:$Whatif -Targets @(Join-Path $env:USERPROFILE "bin\nswag\nswag.exe")
+}
+
 function Generate-LauncherForTargets
 {
     param ($FileName, $Targets, [switch]$Whatif)
@@ -53,7 +65,7 @@ function Generate-LauncherForTargets
         $index += 1
         $script += @"
 if not exist "{0}" goto :next{1}
-start "target" "{0}" %*
+start "target" /B "{0}" %*
 :next{1}
 
 "@ -f $target, $index
@@ -78,3 +90,4 @@ if (!(Test-Path $bindir))
 
 Generate-SublimeLauncher -FileName (Join-Path $bindir "subl.cmd") -Whatif:$Whatif
 Generate-EverythingLauncher -FileName (Join-Path $bindir "everything.cmd") -Whatif:$Whatif
+Generate-NSwagLauncher -FileName (Join-Path $bindir "nswag.cmd") -Whatif:$Whatif
